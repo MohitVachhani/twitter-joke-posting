@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"twitterjokeposting/handler"
 
 	"github.com/gorilla/mux"
 )
@@ -13,6 +14,8 @@ func main() {
 	// Define your routes
 	r.HandleFunc("/", homeHandler).Methods("GET")
 	r.HandleFunc("/about", aboutHandler).Methods("GET")
+	r.HandleFunc("/scheduleJokes", handler.ScheduleJokeForTodayController).Methods("POST")
+	r.HandleFunc("/getScheduleJokes", handler.GetAllScheduledJokes).Methods("GET")
 
 	// Start the server
 	http.ListenAndServe(":6907", r)
@@ -20,10 +23,10 @@ func main() {
 
 // Handler for the home route
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Welcome to the home page!"))
+	w.Write([]byte("Hello World"))
 }
 
 // Handler for the about route
 func aboutHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("About us page"))
+	w.Write([]byte("Scheduling jokes"))
 }
