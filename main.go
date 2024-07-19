@@ -18,7 +18,7 @@ func main() {
 	r.HandleFunc("/getScheduleJokes", handler.GetAllScheduledJokes).Methods("GET")
 
 	// Start the server
-	http.ListenAndServe(":6907", r)
+	http.ListenAndServe(":4000", r)
 }
 
 // Handler for the home route
