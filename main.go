@@ -2,31 +2,25 @@ package main
 
 import (
 	"net/http"
-	"twitterjokeposting/handler"
+	"twitterjokeposting/router"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	godotenv.Load()
+
 	// Create a new router
 	r := mux.NewRouter()
 
 	// Define your routes
-	r.HandleFunc("/", homeHandler).Methods("GET")
-	r.HandleFunc("/about", aboutHandler).Methods("GET")
-	r.HandleFunc("/scheduleJokes", handler.ScheduleJokeForTodayController).Methods("POST")
-	r.HandleFunc("/getScheduleJokes", handler.GetAllScheduledJokes).Methods("GET")
+	routeDefinitions := router.SetRouteDefinitions()
+	for _, routeDefinition := range *routeDefinitions {
+		r.HandleFunc(routeDefinition.RouteName, routeDefinition.Handler).Methods(routeDefinition.MethodType)
+	}
 
 	// Start the server
 	http.ListenAndServe(":4000", r)
-}
-
-// Handler for the home route
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello World"))
-}
-
-// Handler for the about route
-func aboutHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Scheduling jokes"))
 }
