@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"twitterjokeposting/service"
+	jokegenerationsvc "twitterjokeposting/service/joke"
+	"twitterjokeposting/service/tweet"
 )
 
 type APIResponse struct {
@@ -40,7 +42,9 @@ func GetAllScheduledJokes(w http.ResponseWriter, r *http.Request) {
 }
 
 func GenerateJoke(w http.ResponseWriter, r *http.Request) {
-	generatedJoke := service.GenerateJoke()
+	jokeGenerator := jokegenerationsvc.NewJokeGenerator("Programming")
+	generatedJoke := jokeGenerator.GenerateJoke()
+
 	apiResponse := APIResponse{
 		Success: true,
 		Payload: generatedJoke,
@@ -58,6 +62,20 @@ func TweetIt(w http.ResponseWriter, r *http.Request) {
 	apiResponse := APIResponse{
 		Success: true,
 		Payload: tweet,
+	}
+
+	jsonData, _ := json.Marshal(apiResponse)
+
+	// Set Content-Type header
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
+}
+
+func GenerateJokeAndTweetIt(w http.ResponseWriter, r *http.Request) {
+	generatedJoke := tweet.GenerateJokeAndTweetIt()
+	apiResponse := APIResponse{
+		Success: true,
+		Payload: generatedJoke,
 	}
 
 	jsonData, _ := json.Marshal(apiResponse)

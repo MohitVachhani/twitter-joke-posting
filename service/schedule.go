@@ -72,7 +72,7 @@ func GenerateJoke() string {
 
 	fmt.Println(resp.Choices[0].Message.Content)
 
-	return "asdsa"
+	return resp.Choices[0].Message.Content
 }
 
 type authorize struct {
