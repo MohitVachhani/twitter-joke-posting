@@ -44,10 +44,10 @@ func CreateTwitterClient() twitter.Client {
 	return client
 }
 
-func GenerateJokeAndTweetIt() string {
+func GenerateJokeAndTweetIt(genre string) string {
 	ctx := context.Background()
 
-	jokeGenerator := jokegenerationsvc.NewJokeGenerator("Programming")
+	jokeGenerator := jokegenerationsvc.NewJokeGenerator(genre)
 	generatedJoke := jokeGenerator.GenerateJoke()
 
 	twitterClient := CreateTwitterClient()

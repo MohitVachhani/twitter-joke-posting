@@ -14,6 +14,10 @@ type APIResponse struct {
 	ErrorMessage *string
 }
 
+type GenerateJokeAndTweetItInput struct {
+	Genre string `json:"genre"`
+}
+
 func ScheduleJokeForTodayController(w http.ResponseWriter, r *http.Request) {
 	service.ScheduleJokeForToday()
 	apiResponse := APIResponse{
@@ -72,7 +76,10 @@ func TweetIt(w http.ResponseWriter, r *http.Request) {
 }
 
 func GenerateJokeAndTweetIt(w http.ResponseWriter, r *http.Request) {
-	generatedJoke := tweet.GenerateJokeAndTweetIt()
+	var body GenerateJokeAndTweetItInput
+	json.NewDecoder(r.Body).Decode(&body)
+
+	generatedJoke := tweet.GenerateJokeAndTweetIt(body.Genre)
 	apiResponse := APIResponse{
 		Success: true,
 		Payload: generatedJoke,
