@@ -46,7 +46,10 @@ func GetAllScheduledJokes(w http.ResponseWriter, r *http.Request) {
 }
 
 func GenerateJoke(w http.ResponseWriter, r *http.Request) {
-	jokeGenerator := jokegenerationsvc.NewJokeGenerator("Programming")
+	var body GenerateJokeAndTweetItInput
+	json.NewDecoder(r.Body).Decode(&body)
+
+	jokeGenerator := jokegenerationsvc.NewJokeGenerator(body.Genre)
 	generatedJoke := jokeGenerator.GenerateJoke()
 
 	apiResponse := APIResponse{

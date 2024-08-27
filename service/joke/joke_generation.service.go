@@ -32,8 +32,10 @@ func (jg *JokeGenerator) GenerateJoke() string {
 	arthurSystemCommand :=
 		fmt.Sprint("You are working as a content creator of my company, and your task is to create jokes on the topic which I give you. Now the joke can be one liner joke or it can be little bit longer but not longer than 50 words. We also need to make sure that we don't repeat any joke.And now think that we also we need to post this joke on twitter what would be the best hashtag for joke you need to think for that too and let me know... Are you comfortable with this ? And please please return the output in JSON format")
 	// fmt.Println(arthurCommand)
-	arthurUserCommand :=
-		fmt.Sprint("Tell me a joke of Genre, ", genre, " , with proper twitter hashtag and please return the output in JSON format")
+	arthurFirstUserCommand :=
+		fmt.Sprint("Tell me a joke of ", genre, " , with proper twitter hashtag and please return the output in JSON format, JSON key: joke and it should contain both the joke and hashtag in one string only")
+
+	arthurSecondUserCommand := "Joke should not always be a word play, it can be a situational joke too."
 
 	resp, err := arthurClient.CreateChatCompletion(
 		context.Background(),
@@ -46,7 +48,11 @@ func (jg *JokeGenerator) GenerateJoke() string {
 				},
 				{
 					Role:    openai.ChatMessageRoleUser,
-					Content: arthurUserCommand,
+					Content: arthurFirstUserCommand,
+				},
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: arthurSecondUserCommand,
 				},
 			},
 			ResponseFormat: &openai.ChatCompletionResponseFormat{
