@@ -2,7 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 	"twitterjokeposting/service"
 	jokegenerationsvc "twitterjokeposting/service/joke"
@@ -47,6 +49,75 @@ func sendErrorResponse(w http.ResponseWriter, message string, statusCode int, er
 	json.NewEncoder(w).Encode(response)
 }
 
+func authenticateRequest(w http.ResponseWriter, r *http.Request) error {
+	token := extractToken(r)
+	if token == "" {
+		sendErrorResponse(w, "No token provided", http.StatusUnauthorized, "NO_TOKEN")
+		return fmt.Errorf("no token provided")
+	}
+
+	claims, err := validateToken(token)
+	if err != nil {
+		sendErrorResponse(w, "Invalid token", http.StatusUnauthorized, "INVALID_TOKEN")
+		return fmt.Errorf("invalid token")
+	}
+
+	if email, ok := claims["email"].(string); !ok || email != "mohitvachhani55@gmail.com" {
+		sendErrorResponse(w, "Unauthorized user", http.StatusUnauthorized, "UNAUTHORIZED_USER")
+		return fmt.Errorf("unauthorized user")
+	}
+
+	return nil
+}
+
+func extractToken(r *http.Request) string {
+	// Check in cookie
+	if cookie, err := r.Cookie("accessToken"); err == nil {
+		return cookie.Value
+	}
+
+	// Check in Authorization header
+	bearerToken := r.Header.Get("Authorization")
+	if len(strings.Split(bearerToken, " ")) == 2 {
+		return strings.Split(bearerToken, " ")[1]
+	}
+
+	// Check in query parameters
+	token := r.URL.Query().Get("accessToken")
+	if token != "" {
+		return token
+	}
+
+	// Check in request body
+	var body struct {
+		AccessToken string `json:"accessToken"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err == nil {
+		return body.AccessToken
+	}
+
+	return ""
+}
+
+func validateToken(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
+		return jwtKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, jwt.ErrSignatureInvalid
+}
+
 func ScheduleJokeForTodayController(w http.ResponseWriter, r *http.Request) {
 	service.ScheduleJokeForToday()
 	apiResponse := APIResponse{
@@ -75,6 +146,10 @@ func GetAllScheduledJokes(w http.ResponseWriter, r *http.Request) {
 }
 
 func GenerateJoke(w http.ResponseWriter, r *http.Request) {
+	if err := authenticateRequest(w, r); err != nil {
+		return
+	}
+
 	var body GenerateJokeAndTweetItInput
 	json.NewDecoder(r.Body).Decode(&body)
 
@@ -94,6 +169,10 @@ func GenerateJoke(w http.ResponseWriter, r *http.Request) {
 }
 
 func TweetIt(w http.ResponseWriter, r *http.Request) {
+	if err := authenticateRequest(w, r); err != nil {
+		return
+	}
+
 	tweet := service.TweetIt()
 	apiResponse := APIResponse{
 		Success: true,
@@ -108,6 +187,10 @@ func TweetIt(w http.ResponseWriter, r *http.Request) {
 }
 
 func GenerateJokeAndTweetIt(w http.ResponseWriter, r *http.Request) {
+	if err := authenticateRequest(w, r); err != nil {
+		return
+	}
+
 	var body GenerateJokeAndTweetItInput
 	json.NewDecoder(r.Body).Decode(&body)
 
