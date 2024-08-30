@@ -8,12 +8,12 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/joho/godotenv v1.5.1
+	github.com/rs/cors v1.11.0
 	github.com/samber/lo v1.47.0
 	github.com/sashabaranov/go-openai v1.28.2
 )
 
 require (
-	github.com/rs/cors v1.11.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 )

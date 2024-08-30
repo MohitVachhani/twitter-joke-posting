@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"twitterjokeposting/router"
 
@@ -23,13 +24,15 @@ func main() {
 	}
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins:   []string{"*"}, // Consider specifying exact origins in production
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
-		AllowedMethods:   []string{"*"},
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	})
 
 	handler := c.Handler(r)
 
 	// Start the server
-	http.ListenAndServe(":4000", handler)
+	log.Fatal(http.ListenAndServe(":4000", handler))
 }
