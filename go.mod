@@ -5,6 +5,7 @@ go 1.21.5
 require (
 	github.com/dghubble/oauth1 v0.7.3
 	github.com/g8rswimmer/go-twitter/v2 v2.1.5
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/joho/godotenv v1.5.1

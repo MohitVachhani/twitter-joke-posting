@@ -39,6 +39,11 @@ func SetRouteDefinitions() *[]RouteDefinition {
 		MethodType: "POST",
 		Handler:    handler.GenerateJokeAndTweetIt,
 	})
+	routeDefinitions = append(routeDefinitions, RouteDefinition{
+		RouteName:  "/login",
+		MethodType: "POST",
+		Handler:    handler.Login,
+	})
 
 	return &routeDefinitions
 }
