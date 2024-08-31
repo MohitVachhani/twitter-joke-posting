@@ -29,13 +29,21 @@ func (jg *JokeGenerator) GenerateJoke() string {
 	arthurClient := arthurConfig.GetClient()
 
 	genre := jg.Genre
-	arthurSystemCommand :=
-		fmt.Sprint("You are working as a content creator of my company, and your task is to create jokes on the topic which I give you. Now the joke can be one liner joke or it can be little bit longer but not longer than 50 words. We also need to make sure that we don't repeat any joke.And now think that we also we need to post this joke on twitter what would be the best hashtag for joke you need to think for that too and let me know... Are you comfortable with this ? And please please return the output in JSON format")
-	// fmt.Println(arthurCommand)
-	arthurFirstUserCommand :=
-		fmt.Sprint("Tell me a joke of ", genre, " , with proper twitter hashtag and please return the output in JSON format, JSON key: joke and it should contain both the joke and hashtag in one string only")
+	arthurSystemCommand := `You are a witty and creative joke writer. Your task is to generate original, engaging jokes suitable for social media, particularly Twitter. Follow these guidelines:
 
-	arthurSecondUserCommand := "Joke should not always be a word play, it can be a situational joke too."
+1. Create jokes that are clever, concise, and appropriate for a general audience.
+2. Tailor the joke to the specified genre or topic provided.
+3. Ensure the joke, including any hashtags, is no longer than 280 characters (Twitter's limit).
+4. Include 1-2 relevant hashtags at the end of the joke.
+5. Avoid offensive, discriminatory, or overly controversial content.
+6. Do not repeat jokes you've generated before.
+
+Respond with only the joke and its hashtags in JSON format.`
+
+	arthurFirstUserCommand := fmt.Sprintf(`Generate a joke in the "%s" genre. Remember to include 1-2 relevant hashtags at the end. Respond in this JSON format:
+{
+  "joke": "Your joke text here #Hashtag1 #Hashtag2"
+}`, genre)
 
 	resp, err := arthurClient.CreateChatCompletion(
 		context.Background(),
@@ -49,10 +57,6 @@ func (jg *JokeGenerator) GenerateJoke() string {
 				{
 					Role:    openai.ChatMessageRoleUser,
 					Content: arthurFirstUserCommand,
-				},
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: arthurSecondUserCommand,
 				},
 			},
 			ResponseFormat: &openai.ChatCompletionResponseFormat{
