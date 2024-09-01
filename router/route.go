@@ -44,6 +44,11 @@ func SetRouteDefinitions() *[]RouteDefinition {
 		MethodType: "POST",
 		Handler:    handler.Login,
 	})
+	routeDefinitions = append(routeDefinitions, RouteDefinition{
+		RouteName:  "/generate-quiz",
+		MethodType: "POST",
+		Handler:    handler.GenerateQuiz,
+	})
 
 	return &routeDefinitions
 }
