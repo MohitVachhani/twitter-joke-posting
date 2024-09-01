@@ -72,28 +72,45 @@ func (qg *QuestionGenerator) GenerateQuestions() ([]schemaInterface.QuestionSche
 	arthurConfig := arthur.NewArthurConfigType(os.Getenv("CHAT_GPT_API_SECRET"))
 	arthurClient := arthurConfig.GetClient()
 
-	arthurSystemCommand := fmt.Sprintf(`You are an educational content creator. Your task is to Generate a quiz with %s questions on theme: %s. Follow these guidelines, generate original, engaging questions suitable for quizzes. 
-1. Create questions that are clear, concise, and appropriate for the specified theme.
-2. Provide 4 options for each question, with one or more correct answers.
-3. Ensure the questions are suitable for a general audience.
-4. Avoid offensive, discriminatory, or overly controversial content.
-5. Do not repeat questions you've generated before.
+	arthurSystemCommand :=
+		fmt.Sprintf(`You are an educational content creator. Your task is to Generate a quiz with different questions on theme: %s. Follow these guidelines, generate original, engaging questions suitable for quizzes.`, qg.ThemeName)
+	arthurInstructionCommands := []string{
+		`Use tone and style to create more engaging and personalized responses`,
+		`Incorporate humor or wit when appropriate`,
+		`Create questions that are clear, concise, and appropriate for the specified theme.`,
+		`Provide 4 options for each question, with one or more correct answers.`,
+		`Ensure the questions are suitable for a general audience.`,
+		`Avoid offensive, discriminatory, or overly controversial content.`,
+		`Do not repeat questions you've generated before.`,
+	}
+	arthurResponseSystemCommand := `Respond with the questions and please return in array json format. Every json should have questionText, options array, and which option indexes are correct. The json format should be, key should be quiz and value should be array of questions. Multiple options can be correct so inside question json, correctIndexes should be an array.`
 
-Respond with the questions and please return in array json format. Every json should have questionText, options array, and which option indexes are correct. 
-The json format should be, key should be quiz and value should be array of questions. Multiple options can be correct so inside question json, correctIndexes should be an array.
-`, fmt.Sprint(qg.NumberOfQuestions), qg.ThemeName)
+	arthurMessages := []openai.ChatCompletionMessage{}
+	arthurMessages = append(arthurMessages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleSystem,
+		Content: arthurSystemCommand,
+	})
+	for i := range arthurInstructionCommands {
+		arthurMessages = append(arthurMessages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: arthurInstructionCommands[i],
+		})
+	}
+	arthurMessages = append(arthurMessages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleSystem,
+		Content: arthurResponseSystemCommand,
+	})
+	arthurMessages = append(arthurMessages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: fmt.Sprintf(`Generate a quiz on the theme "%s" with %d questions. Respond in array JSON format.`, qg.ThemeName, qg.NumberOfQuestions),
+	})
 
 	resp, err := arthurClient.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
 			Model:     openai.GPT3Dot5Turbo,
 			MaxTokens: 1800,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleSystem,
-					Content: arthurSystemCommand,
-				},
-			},
+			Messages:  arthurMessages,
 			ResponseFormat: &openai.ChatCompletionResponseFormat{
 				Type: openai.ChatCompletionResponseFormatTypeJSONObject,
 			},
