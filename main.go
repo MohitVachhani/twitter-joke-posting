@@ -22,10 +22,7 @@ func contentTypeMiddleware(next http.Handler) http.Handler {
 
 func main() {
 	// Load environment variables from .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	godotenv.Load()
 
 	// Create a new router
 	r := mux.NewRouter()
