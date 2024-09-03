@@ -3,11 +3,13 @@ package main
 import (
 	"log"
 	"net/http"
+	"twitterjokeposting/middleware"
 	"twitterjokeposting/router"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
+	"golang.org/x/time/rate"
 )
 
 // contentTypeMiddleware sets the Content-Type header to application/json for all responses
@@ -19,7 +21,11 @@ func contentTypeMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
-	godotenv.Load()
+	// Load environment variables from .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
 
 	// Create a new router
 	r := mux.NewRouter()
@@ -30,7 +36,11 @@ func main() {
 		r.HandleFunc(routeDefinition.RouteName, routeDefinition.Handler).Methods(routeDefinition.MethodType)
 	}
 
-	// Apply the content type middleware
+	// Create a new rate limiter that allows 5 requests per minute with a burst of 10
+	limiter := middleware.NewIPRateLimiter(rate.Limit(5/60), 10)
+
+	// Apply middlewares
+	r.Use(middleware.RateLimitMiddleware(limiter))
 	r.Use(contentTypeMiddleware)
 
 	c := cors.New(cors.Options{
